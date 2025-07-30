@@ -1,13 +1,10 @@
 from flask import Flask, request, jsonify
-from pyngrok import ngrok
 import requests
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 app = Flask(__name__)
 
+# Pega as chaves da API do Trello via variáveis de ambiente
 TRELLO_KEY = os.environ.get("TRELLO_KEY")
 TRELLO_TOKEN = os.environ.get("TRELLO_TOKEN")
 
@@ -33,6 +30,5 @@ def criar_card():
         return jsonify({"status": "error", "message": response.text}), response.status_code
 
 if __name__ == '__main__':
-    public_url = ngrok.connect(5000, "http")
-    print(f"⚡ Webhook disponível em: {public_url}")
-    app.run(host='0.0.0.0', port=5000)
+    print("⚡ Faro Cloud rodando no Render!")
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
