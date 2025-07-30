@@ -8,6 +8,9 @@ app = Flask(__name__)
 TRELLO_KEY = os.environ.get("TRELLO_KEY")
 TRELLO_TOKEN = os.environ.get("TRELLO_TOKEN")
 
+# Armazena o último comando enviado (em memória)
+ultimo_comando = ""
+
 @app.route('/')
 def index():
     return "Faro Cloud webhook rodando!"
@@ -28,6 +31,17 @@ def criar_card():
         return jsonify({"status": "success", "card": response.json()})
     else:
         return jsonify({"status": "error", "message": response.text}), response.status_code
+
+@app.route('/set-comando', methods=['POST'])
+def set_comando():
+    global ultimo_comando
+    data = request.get_json()
+    ultimo_comando = data.get("comando", "")
+    return jsonify({"status": "comando recebido", "comando": ultimo_comando})
+
+@app.route('/ultimo-comando', methods=['GET'])
+def get_ultimo_comando():
+    return ultimo_comando, 200
 
 if __name__ == '__main__':
     print("⚡ Faro Cloud rodando no Render!")
