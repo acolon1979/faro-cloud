@@ -8,6 +8,9 @@ app = Flask(__name__)
 TRELLO_KEY = os.environ.get("TRELLO_KEY")
 TRELLO_TOKEN = os.environ.get("TRELLO_TOKEN")
 
+# Variável global (RAM) — mantém o último comando
+comando_em_memoria = {"titulo": "", "descricao": ""}
+
 @app.route('/')
 def index():
     return "Faro Cloud webhook rodando!"
@@ -31,30 +34,16 @@ def criar_card():
 
 @app.route('/set-comando', methods=['POST'])
 def set_comando():
+    global comando_em_memoria
     titulo = request.json.get("titulo", "").strip()
     descricao = request.json.get("descricao", "").strip()
-    comando = f"{titulo}||{descricao}"
-    
-    with open("comando_atual.txt", "w") as f:
-        f.write(comando)
-
-    return jsonify({"status": "comando recebido", "comando": comando})
+    comando_em_memoria["titulo"] = titulo
+    comando_em_memoria["descricao"] = descricao
+    return jsonify({"status": "comando recebido", "comando": comando_em_memoria})
 
 @app.route('/ultimo-comando', methods=['GET'])
 def get_ultimo_comando():
-    try:
-        with open("comando_atual.txt", "r") as f:
-            comando = f.read().strip()
-        if "||" in comando:
-            titulo, descricao = comando.split("||", 1)
-            return jsonify({
-                "titulo": titulo.strip(),
-                "descricao": descricao.strip()
-            })
-        else:
-            return jsonify({})
-    except FileNotFoundError:
-        return jsonify({})
+    return jsonify(comando_em_memoria)
 
 if __name__ == '__main__':
     print("⚡ Faro Cloud rodando no Render!")
