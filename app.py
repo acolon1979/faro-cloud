@@ -31,24 +31,30 @@ def criar_card():
 
 @app.route('/set-comando', methods=['POST'])
 def set_comando():
-    data = request.get_json()
-    titulo = data.get("titulo", "").strip()
-    descricao = data.get("descricao", "").strip()
+    titulo = request.json.get("titulo", "").strip()
+    descricao = request.json.get("descricao", "").strip()
     comando = f"{titulo}||{descricao}"
     
     with open("comando_atual.txt", "w") as f:
         f.write(comando)
-    
+
     return jsonify({"status": "comando recebido", "comando": comando})
 
 @app.route('/ultimo-comando', methods=['GET'])
 def get_ultimo_comando():
     try:
         with open("comando_atual.txt", "r") as f:
-            comando = f.read()
-        return comando, 200
+            comando = f.read().strip()
+        if "||" in comando:
+            titulo, descricao = comando.split("||", 1)
+            return jsonify({
+                "titulo": titulo.strip(),
+                "descricao": descricao.strip()
+            })
+        else:
+            return jsonify({})
     except FileNotFoundError:
-        return "", 200
+        return jsonify({})
 
 if __name__ == '__main__':
     print("⚡ Faro Cloud rodando no Render!")
