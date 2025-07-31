@@ -41,8 +41,18 @@ def set_comando():
     comando_em_memoria["descricao"] = descricao
     return jsonify({"status": "comando recebido", "comando": comando_em_memoria})
 
-@app.route('/ultimo-comando', methods=['GET'])
-def get_ultimo_comando():
+@app.route('/ultimo-comando', methods=['POST', 'GET'])
+def ultimo_comando():
+    global comando_em_memoria
+    if request.method == 'POST':
+        # Recebe os dados enviados para atualizar o comando
+        titulo = request.json.get("titulo", "").strip()
+        descricao = request.json.get("descricao", "").strip()
+        comando_em_memoria["titulo"] = titulo
+        comando_em_memoria["descricao"] = descricao
+        return jsonify({"status": "comando atualizado", "comando": comando_em_memoria})
+
+    # Método GET retorna o comando em memória
     return jsonify(comando_em_memoria)
 
 if __name__ == '__main__':
